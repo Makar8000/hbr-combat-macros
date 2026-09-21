@@ -3,52 +3,48 @@ import cv2
 import numpy as np
 import pygetwindow as gw
 import pyautogui
-import os
 
-def get_game_screenshot(dx,dy,dHidth,dHeight):
-    """ 截取游戏窗口的屏幕截图 """
+def get_game_screenshot(dx, dy, dWidth, dHeight):
+    """ Capture a screenshot of the game window """
     game_window = gw.getWindowsWithTitle('HeavenBurnsRed')[0]
     if not game_window:
-        print("❌ 未找到游戏窗口")
+        print("❌ Game window not found")
         return None
 
-    game_window.activate()  # 获取窗口
-    x, y, width, height = game_window.left + dx, game_window.top+dy, dHidth, dHeight
+    game_window.activate()  # Focus the window
+    x, y, width, height = game_window.left + dx, game_window.top + dy, dWidth, dHeight
 
     time.sleep(1)
 
-    # 使用 pyautogui 截图
+    # Capture screenshot using pyautogui
     screenshot = pyautogui.screenshot(region=(x, y, width, height))
-    screenshot = np.array(screenshot)  # 转换为 OpenCV 格式
-    screenshot = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)  # 转换为 BGR 格式
+    screenshot = np.array(screenshot)  # Convert to OpenCV format
+    screenshot = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)  # Convert to BGR format
 
-    # 保存截图
+    # Save screenshot
     # cv2.imwrite("pic.png", screenshot)
 
     return screenshot
 
-def find_target_on_screen(target_url, dx, dy, d_width, d_height):
-    """ 在游戏窗口截图中查找目标图片 """
+def find_target_on_screen(target_img, dx, dy, d_width, d_height):
+    """ Find a pre-loaded target template image within the game window screenshot """
     screenshot = get_game_screenshot(dx, dy, d_width, d_height)
     if screenshot is None:
         return False
 
-    # 读取目标图片
-    target = cv2.imread(target_url, cv2.IMREAD_COLOR)
-
-    if target is None:
-        print("❌ 无法加载目标图片")
+    # Check preloaded target_img
+    if target_img is None:
+        print("❌ Loaded target image data is empty")
         return False
 
-    # 使用 OpenCV 模板匹配
-    result = cv2.matchTemplate(screenshot, target, cv2.TM_CCOEFF_NORMED)
+    # Perform template matching using OpenCV
+    result = cv2.matchTemplate(screenshot, target_img, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
-    # 如果匹配度大于阈值，返回坐标
     if max_val >= 0.8:
         target_x, target_y = max_loc
-        print(f"✅ 找到目标图片，位置: ({target_x}, {target_y})")
+        # print(f"✅ Target image found at position: ({target_x}, {target_y})")
         return True
     else:
-        print("❌ 未找到目标图片")
+        # print("⏳ Polling for target image...")
         return False

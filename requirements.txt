@@ -1,0 +1,9 @@
+pynput==1.8.2
+pygetwindow==0.0.9
+pandas==3.0.6
+numpy==2.5.3
+pyautogui==0.9.54
+opencv-python==5.0.0.93
+tqdm
+Pillow
+pyscreeze

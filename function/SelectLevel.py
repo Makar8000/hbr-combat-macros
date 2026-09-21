@@ -1,46 +1,64 @@
+import os
 import pandas as pd
 from function import EnterLevel
 from function import FinishLevel
-
 from standard.utils import ComparePicUtil
 
+LOOP_COUNT = 1
+
 def start():
-    # 读取Excel文件
-    file_path = "proprieties/script_controller.xlsx"
+    # Folder path containing your game routine CSV files
+    folder_path = "sheets"
+    
+    # Scan the folder and list all files ending with .csv
+    if not os.path.exists(folder_path):
+        print(f"❌ Error: Folder '{folder_path}' does not exist.")
+        return
+        
+    csv_files = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
 
-    # 使用pandas获取Excel文件中的所有sheet名称
-    excel_file = pd.ExcelFile(file_path)
+    if not csv_files:
+        print("❌ Error: No CSV files found in the 'sheets' folder.")
+        return
 
-    # 获取所有的sheet名称
-    sheet_names = excel_file.sheet_names
-
-    # 显示所有的 sheet 名称并生成选单
-    print("请选择一个 sheet 读取内容:")
-    for index, sheet_name in enumerate(sheet_names, 1):
-        print(f"{index}. {sheet_name}")
-
-        # 获取用户输入的序号
-        # choice = int(input("请输入序号: "))
+    # Determine selection choice dynamically based on file count
+    if len(csv_files) == 1:
         choice = 1
+        print(f"ℹ️ Auto-selecting: {csv_files[0]}")
+    else:
+        # Display selection menu only if multiple files exist
+        print("⚠️ Please select a CSV script to run:")
+        for index, file_name in enumerate(csv_files, 1):
+            print(f"{index}. {file_name}")
+            
+        try:
+            choice = int(input("\nPlease enter the number: "))
+        except ValueError:
+            print("❌ Error: Invalid input. Please enter a valid number.")
+            return
 
-        # 判断输入的序号是否有效
-        if 1 <= choice <= len(sheet_names):
-            selected_sheet = sheet_names[choice - 1]  # 获取选中的 sheet 名称
-            # 读取选中的 sheet 内容
-            df = excel_file.parse(selected_sheet)
-            print(f"您选择的 sheet 是: {selected_sheet}")
-            print("该 sheet 的内容如下：")
-            print(df)
-            # 暂时写死循环数 todo:优化选择方式 低
-            for _ in range(15):
-                # 进入当前关卡
-                EnterLevel.start(df)
-                # 等待关卡结束
-                ComparePicUtil.wait_for_level_finish()
-                # 关卡重复战斗
-                FinishLevel.start()
-        else:
-            print("输入的序号无效，请输入一个有效的序号。")
+    # Check if the selection index is valid
+    if 1 <= choice <= len(csv_files):
+        selected_file = csv_files[choice - 1]
+        file_path = os.path.join(folder_path, selected_file)
+        
+        # Read the content of the selected CSV file
+        df = pd.read_csv(file_path)
+        print(f"\nThe script you selected is: {selected_file}")
+        print("The content of this script is as follows:")
+        print(df)
+        
+        # Level execution loop (Repeating the battle LOOP_COUNT times)
+        for i in range(LOOP_COUNT):
+            print(f"\n--- Starting Level Loop {i + 1}/{LOOP_COUNT} ---")
+            # Enter the current level using the DataFrame actions
+            EnterLevel.start(df)
+            # Wait for the level to finish via CV image matching
+            ComparePicUtil.wait_for_level_finish()
+            # Handle post-match rewards, stoning, and rematch queueing
+            FinishLevel.start()
+    else:
+        print("❌ The number entered is invalid. Please enter a valid number.")
 
 
 class SelectLevel:

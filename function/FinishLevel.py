@@ -1,19 +1,17 @@
-from standard.entity import GameRoundEntity
 from function import ExecuteFinishProcess
-import pygetwindow as gw
 import time
 
 
 def start():
-    # # 获取窗口
+    # # Get game window
     # game_window = gw.getWindowsWithTitle('HeavenBurnsRed')[0]
-    # # 激活并将窗口切换到前台
+    # # Activate and bring the window to the foreground
     # game_window.activate()
 
-    # 执行游戏脚本
+    # Execute the game script
     ExecuteFinishProcess.start()
 
-    # 等待加载时间
+    # Wait for loading time
     time.sleep(15)
 
 class FinishLevel:
