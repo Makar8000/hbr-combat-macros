@@ -38,8 +38,18 @@ def find_target_on_screen(target_img, dx, dy, d_width, d_height):
         print("❌ Loaded target image data is empty")
         return False
 
-    # Perform template matching using OpenCV
-    result = cv2.matchTemplate(screenshot, target_img, cv2.TM_CCOEFF_NORMED)
+    # Check if the template has an alpha channel (4 channels) safely
+    if len(target_img.shape) == 3 and target_img.shape[2] == 4:
+        # Split channels: BGR color layers and the Alpha transparency mask layer
+        template_color = cv2.cvtColor(target_img, cv2.COLOR_BGRA2BGR)
+        mask = target_img[:, :, 3]
+        
+        # Match using the transparency mask layout
+        result = cv2.matchTemplate(screenshot, template_color, cv2.TM_CCOEFF_NORMED, mask=mask)
+    else:
+        # Fallback regular match if the image has no alpha layer
+        result = cv2.matchTemplate(screenshot, target_img, cv2.TM_CCOEFF_NORMED)
+
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
     if max_val >= 0.8:

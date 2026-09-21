@@ -3,14 +3,13 @@ import cv2
 from standard.utils import PrintScreenUtil
 
 # Pre-load the target images into RAM memory exactly once when the module imports
-START_BUTTON_IMG = cv2.imread("static/startActionButton.png", cv2.IMREAD_COLOR)
-BATTLE_RESULT_IMG = cv2.imread("static/battleResultIcon.png", cv2.IMREAD_COLOR)
-OVERDRIVE_READY_IMG = cv2.imread("static/overdriveCancel.png", cv2.IMREAD_COLOR)
+START_BUTTON_IMG = cv2.imread("static/startActionButton.png", cv2.IMREAD_UNCHANGED)
+BATTLE_RESULT_IMG = cv2.imread("static/battleResultIcon.png", cv2.IMREAD_UNCHANGED)
+OVERDRIVE_READY_IMG = cv2.imread("static/overdriveCancel.png", cv2.IMREAD_UNCHANGED)
 
 def wait_for_friend_round():
     flag = True
     while flag:
-        # Pass the pre-loaded image variable directly
         if not PrintScreenUtil.find_target_on_screen(START_BUTTON_IMG, 2196, 1021, 310, 308):
             time.sleep(1)
         else:
