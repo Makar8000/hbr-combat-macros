@@ -62,5 +62,4 @@ def start():
 
 
 class SelectLevel:
-    start()
     pass

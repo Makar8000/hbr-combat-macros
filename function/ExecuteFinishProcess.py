@@ -11,10 +11,9 @@ mouse_controller = mouse.Controller()
 keyboard_controller = keyboard.Controller()
 
 
-def tap_key_with_delay(tap_key):
+def tap_key_with_delay(tap_key, delay=0.5):
     keyboard_controller.tap(tap_key)
-    # Wait for 0.5 seconds
-    time.sleep(0.5)
+    time.sleep(delay)
 
 
 def start():
