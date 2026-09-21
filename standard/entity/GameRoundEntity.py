@@ -72,4 +72,4 @@ class GameRoundEntity:
         tgt_display = f"Target:{self.skill_target_position}" if self.skill_target_position else ""
         exec_display = "EXECUTE" if self.execute else ""
 
-        return f"[{self.round_number:^8}]: {od_display:<8} │ {pos_display:<8} │ {action_display:<5} │ {seq_display:<8} │ {tgt_display:<8} │ {exec_display:<7}"
+        return f"[{self.round_number:<8}]: {od_display:<8} │ {pos_display:<8} │ {action_display:<5} │ {seq_display:<8} │ {tgt_display:<8} │ {exec_display:<7}"

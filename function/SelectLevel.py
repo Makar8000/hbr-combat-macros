@@ -1,8 +1,9 @@
 import os
 import pandas as pd
+import time
 from function import EnterLevel
-from function import FinishLevel
-from standard.utils import ComparePicUtil
+# from function import FinishLevel
+# from standard.utils import ComparePicUtil
 
 LOOP_COUNT = 1
 
@@ -45,18 +46,33 @@ def start():
         # Read the content of the selected CSV file
         df = pd.read_csv(file_path)
         print(f"\nThe script you selected is: {selected_file}")
-        print("The content of this script is as follows:")
-        print(df)
+        # print("The content of this script is as follows:")
+        # print(df)
         
-        # Level execution loop (Repeating the battle LOOP_COUNT times)
+        # Macro execution loop (Repeating the battle LOOP_COUNT times)
         for i in range(LOOP_COUNT):
-            print(f"\n--- Starting Level Loop {i + 1}/{LOOP_COUNT} ---")
+            print(f"\n--- Starting Macro Loop {i + 1}/{LOOP_COUNT} ---")
+
+            # Record the exact start time of the loop
+            loop_start_time = time.time()
+
             # Enter the current level using the DataFrame actions
             EnterLevel.start(df)
+
             # Wait for the level to finish via CV image matching
-            ComparePicUtil.wait_for_level_finish()
+            # ComparePicUtil.wait_for_level_finish()
+
+            # Record the end time and calculate the duration
+            loop_end_time = time.time()
+            elapsed_seconds = loop_end_time - loop_start_time
+
+            # Format into minutes and seconds
+            minutes = int(elapsed_seconds // 60)
+            seconds = int(elapsed_seconds % 60)
+            print(f"⏱️ Macro Loop {i + 1} finished in: {minutes}m {seconds}s")
+
             # Handle post-match rewards, stoning, and rematch queueing
-            FinishLevel.start()
+            # FinishLevel.start()
     else:
         print("❌ The number entered is invalid. Please enter a valid number.")
 

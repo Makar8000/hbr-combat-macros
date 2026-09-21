@@ -6,7 +6,7 @@ import time
 # Simulate input
 keyboard_controller = keyboard.Controller()
 
-def tap_key_with_delay(tap_key, delay=0.5):
+def tap_key_with_delay(tap_key, delay=0.4):
     keyboard_controller.tap(tap_key)
     time.sleep(delay)
 
@@ -88,7 +88,7 @@ def start(game_round_entity):
                     tap_key_with_delay(Key.down, 0.3)
 
         # Action - Confirm skill
-        tap_key_with_delay(Key.enter, 0.8)
+        tap_key_with_delay(Key.enter, 0.65)
 
         # Check if an ally character needs to be targeted
         if game_round_entity.skill_target_position is not None:
@@ -99,7 +99,7 @@ def start(game_round_entity):
     # Check whether to end the current turn
     if game_round_entity.execute:
         # Action - End current turn
-        print(f"✅ Ending current turn")
+        # print(f"✅ Ending current turn")
         tap_key_with_delay(Key.enter)
         
         # TRIGGER END OF TURN: Handles Positive Overdrive settings (1, 2, 3)
