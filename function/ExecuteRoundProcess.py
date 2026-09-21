@@ -15,27 +15,26 @@ def trigger_overdrive_sequence(target_level):
     if isinstance(target_level, int):
         # Convert negative integers to their positive absolute value for the keypress
         actual_keypress = abs(target_level)
-        print(f"⚡ Opening Overdrive Menu...")
+        print(f"⚡ Activating Overdrive Level: {actual_keypress}")
         tap_key_with_delay('o')  # Press the 'O' key to open Overdrive menu
         
         # Dynamic check via image matching for menu loading state
         ComparePicUtil.wait_for_overdrive_ready()
         
-        print(f"⚡ Activating Overdrive Level: {actual_keypress}")
         tap_key_with_delay(str(actual_keypress))  # Press 1, 2, or 3 to select level
         time.sleep(3.0)  # Extra buffer pause for the game activation animation
 
 def start(game_round_entity):
-    print(f"▶️ Executing {game_round_entity}")
-
     # Wait for turn UI initialization / ally's turn
     ComparePicUtil.wait_for_friend_round()
 
+    print(f"▶️ {game_round_entity}")
+
     od = game_round_entity.overdrive_level
 
-    # TRIGGER START OF TURN HACKS: Special Alt Skill combination (Alt -> Enter)
+    # TRIGGER START OF TURN: Alt Skill combination (Alt -> Enter)
     if od == 'ALT':
-        print("✨ Triggering Special Alt Skill combination (Alt -> Enter)")
+        print("✨ Activating Alt Skill")
         tap_key_with_delay(Key.alt)
         tap_key_with_delay(Key.enter)
         time.sleep(5.0) # Extra animation buffer

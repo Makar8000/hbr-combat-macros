@@ -18,7 +18,7 @@ def tap_key_with_delay(tap_key, delay=0.5):
 
 def start():
     # TODO: update to support latest client version
-    print(f"⏹️ Executing ExecuteFinishProcess...")
+    print(f"⏹️ Running ExecuteFinishProcess...")
 
     game_window = gw.getWindowsWithTitle('HeavenBurnsRed')[0]
 

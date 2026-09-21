@@ -6,23 +6,24 @@ import pyautogui
 
 def get_game_screenshot(dx, dy, dWidth, dHeight):
     """ Capture a screenshot of the game window """
-    game_window = gw.getWindowsWithTitle('HeavenBurnsRed')[0]
+    game_window = gw.getWindowsWithTitle('HeavenBurnsRed')
     if not game_window:
         print("❌ Game window not found")
         return None
 
-    game_window.activate()  # Focus the window
-    x, y, width, height = game_window.left + dx, game_window.top + dy, dWidth, dHeight
+    try:
+        game_window[0].activate()  # Use index 0 to target the window handle directly
+    except Exception:
+        # Ignore pygetwindow focus issues and keep executing
+        pass
+
+    x, y, width, height = game_window[0].left + dx, game_window[0].top + dy, dWidth, dHeight
 
     time.sleep(1)
 
-    # Capture screenshot using pyautogui
     screenshot = pyautogui.screenshot(region=(x, y, width, height))
-    screenshot = np.array(screenshot)  # Convert to OpenCV format
-    screenshot = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR)  # Convert to BGR format
-
-    # Save screenshot
-    # cv2.imwrite("pic.png", screenshot)
+    screenshot = np.array(screenshot) # Convert to OpenCV format
+    screenshot = cv2.cvtColor(screenshot, cv2.COLOR_RGB2BGR) # Convert to BGR format
 
     return screenshot
 
