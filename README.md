@@ -1,6 +1,6 @@
 # Heaven Burns Red - Combat Macros
 
-This application is a specialized macro orchestration framework designed to fully automate encounters in *Heaven Burns Red* without requiring active player input. Built to eliminate repetitive grinding and automate battle loops, it allows users to write out high-level combat strategies in human-readable spreadsheet formats and translate them into direct in-game execution.
+This application is a macro framework built to execute combat strategies in *Heaven Burns Red* without requiring manual player input. It functions by reading custom turn actions from a simple CSV spreadsheet and translating them directly into automated in-game keystrokes.
 
 ## Credits
 
