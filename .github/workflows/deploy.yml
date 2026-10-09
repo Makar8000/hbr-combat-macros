@@ -1,0 +1,71 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+          cache: true
+
+      - name: Format
+        run: deno fmt --check
+
+      - name: Lint
+        run: deno lint
+
+      - name: Type check
+        run: deno check src/main.ts
+
+      - name: Compile
+        run: deno task compile
+
+      - name: Package
+        run: |
+          New-Item -ItemType Directory -Path package/hbr-combat-macros | Out-Null
+          Copy-Item hbr-combat-macros.exe, README.md package/hbr-combat-macros/
+          Copy-Item sheets package/hbr-combat-macros/sheets -Recurse
+          Compress-Archive -Path package/hbr-combat-macros -DestinationPath hbr-combat-macros.zip
+
+      - name: Check version
+        id: version
+        run: |
+          $version = (Get-Content deno.json -Raw | ConvertFrom-Json).version
+          if (-not $version) { throw "deno.json has no version" }
+          $tag = "v$version"
+          git rev-parse -q --verify "refs/tags/$tag" | Out-Null
+          $due = ($LASTEXITCODE -ne 0) -and ($env:GITHUB_EVENT_NAME -eq "push")
+          $global:LASTEXITCODE = 0
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "release=$($due.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+
+      - name: Release notes
+        if: steps.version.outputs.release == 'true'
+        run: |
+          # Commits since the previous version tag (or all commits for the first release)
+          $previous = git tag --list "v*" --sort=-v:refname | Select-Object -First 1
+          $range = if ($previous) { "$previous..HEAD" } else { "HEAD" }
+          git log $range --no-merges --pretty=format:"- %s" | Set-Content release-notes.md
+
+      - name: Release
+        if: steps.version.outputs.release == 'true'
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          files: hbr-combat-macros.zip
+          body_path: release-notes.md
