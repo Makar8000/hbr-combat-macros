@@ -12,6 +12,7 @@
     "fast-png": "npm:fast-png@^8"
   },
   "fmt": {
-    "lineWidth": 150
+    "lineWidth": 150,
+    "proseWrap": "preserve"
   }
 }
