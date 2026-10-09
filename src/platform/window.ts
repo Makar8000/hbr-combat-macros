@@ -34,16 +34,17 @@ function visibleWindows(): { hwnd: bigint; title: string }[] {
 export function findWindow(title: string): GameWindow | undefined {
   const match = visibleWindows().find((w) => w.title.toUpperCase().includes(title.toUpperCase()));
   if (!match) return undefined;
-  // The capture regions are measured from GetWindowRect, not the client area.
+  // Use the client area (the game picture), without the title bar and borders.
   const rect = new Int32Array(4);
-  user32.GetWindowRect(match.hwnd, new Uint8Array(rect.buffer));
-  const [left, top, right, bottom] = rect;
+  user32.GetClientRect(match.hwnd, new Uint8Array(rect.buffer));
+  const origin = new Int32Array(2); // client (0, 0) in screen coordinates
+  user32.ClientToScreen(match.hwnd, new Uint8Array(origin.buffer));
   return {
     hwnd: match.hwnd,
-    left,
-    top,
-    width: right - left,
-    height: bottom - top,
+    left: origin[0],
+    top: origin[1],
+    width: rect[2],
+    height: rect[3],
   };
 }
 

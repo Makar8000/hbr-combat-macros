@@ -52,8 +52,11 @@ export function loadTemplate(path: string): Template {
   return { color, mask };
 }
 
-/** How well `template` matches `frame`, from the best spot found (TM_CCOEFF_NORMED, 1 is perfect). */
-export function matchScore(frame: Frame, template: Template): number {
+/**
+ * How well `template` matches `frame`, from the best spot found (TM_CCOEFF_NORMED, 1 is perfect).
+ * `scale` is the frame's size relative to the template's resolution. The frame is resized back to it.
+ */
+export function matchScore(frame: Frame, template: Template, scale = 1): number {
   const bgra = cv.matFromArray(
     frame.height,
     frame.width,
@@ -64,6 +67,12 @@ export function matchScore(frame: Frame, template: Template): number {
   const result = new cv.Mat();
   try {
     cv.cvtColor(bgra, bgr, cv.COLOR_BGRA2BGR);
+    if (scale !== 1) {
+      // Never go smaller than the template, or matchTemplate throws.
+      const w = Math.max(Math.round(frame.width / scale), template.color.cols);
+      const h = Math.max(Math.round(frame.height / scale), template.color.rows);
+      cv.resize(bgr, bgr, new cv.Size(w, h), 0, 0, scale > 1 ? cv.INTER_AREA : cv.INTER_LINEAR);
+    }
     if (template.mask) {
       cv.matchTemplate(
         bgr,
@@ -76,6 +85,12 @@ export function matchScore(frame: Frame, template: Template): number {
       cv.matchTemplate(bgr, template.color, result, cv.TM_CCOEFF_NORMED);
     }
     return cv.minMaxLoc(result).maxVal;
+  } catch (e) {
+    if (typeof e === "number") {
+      // OpenCV throws a bare pointer number, which tells you nothing. Turn it into a message.
+      throw new Error(`OpenCV: ${cv.exceptionFromPtr(e).msg}`);
+    }
+    throw e;
   } finally {
     bgra.delete();
     bgr.delete();

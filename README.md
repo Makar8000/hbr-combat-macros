@@ -24,9 +24,10 @@ To write your own macros, check out the detailed [CSV Format Guide](./sheets/REA
 ### Prerequisites
 
 - Windows-only (for now).
+- The game must be running at a 16:9 resolution (such as 1920x1080). If your monitor is not 16:9, please run the game in Windowed mode using a 16:9 resolution.
+- The game must be fully visible and not covered by any other windows.
 - You must run it as an **Administrator**. The keyboard inputs will not register otherwise.
 - The `sheets/` folder must exist next to the `.exe` and contain at least one `.csv` file.
-- Currently only supports games that run as fullscreen at 2560x1440 resolution. I plan to fix this to support any 16:9 ratio in the future.
 
 ### Using the Release
 
