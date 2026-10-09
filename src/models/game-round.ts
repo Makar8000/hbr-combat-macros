@@ -1,14 +1,14 @@
-/** `X` or `X.Y`. Strict string form: "3.10" is major 3, minor 10. */
+/** Parsed from `X` or `X.Y`. */
 export interface Sequence {
   major: number;
   minor: number | null;
 }
 
-/** A negative level runs before the turn, a positive level after it, "ALT" is the alt skill. */
+/** Negative levels run before the turn, positive levels after it. "ALT" is the alt skill. */
 export type Overdrive = "ALT" | number | null;
 
 export interface GameRound {
-  /** Label for console output only. */
+  /** Only used for logging. */
   label: string;
   position: number;
   swap: boolean;
@@ -37,7 +37,7 @@ function parseOverdrive(v: string | undefined): Overdrive {
   return n !== null && n >= -3 && n <= 3 && n !== 0 ? n : null;
 }
 
-/** Builds a round from one CSV record (all fields are strings; blanks are empty strings). */
+/** Turns one CSV row into a round. Every field is a string, and blank cells are empty strings. */
 export function parseGameRound(row: Record<string, string>): GameRound {
   const position = parseInteger(row.position);
   if (position === null) {

@@ -3,14 +3,14 @@ import { gdi32, user32 } from "./win32.ts";
 export interface Frame {
   width: number;
   height: number;
-  /** BGRA, top-down. Alpha is not meaningful (GDI leaves it 0). */
+  /** BGRA pixels, top row first. Ignore the alpha channel, GDI leaves it at 0. */
   data: Uint8Array;
 }
 
 const SRCCOPY = 0x00cc0020;
 const DIB_RGB_COLORS = 0;
 
-/** Captures a screen region (physical pixels) via GDI. */
+/** Grabs a region of the screen using GDI. */
 export function captureRegion(
   x: number,
   y: number,
@@ -25,7 +25,7 @@ export function captureRegion(
     if (!gdi32.BitBlt(memDc, 0, 0, width, height, screenDc, x, y, SRCCOPY)) {
       throw new Error("BitBlt failed");
     }
-    // BITMAPINFOHEADER, negative height = top-down rows.
+    // BITMAPINFOHEADER. A negative height makes the rows come out top first.
     const header = new Uint8Array(40);
     const view = new DataView(header.buffer);
     view.setUint32(0, 40, true);

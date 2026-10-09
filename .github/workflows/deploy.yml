@@ -56,7 +56,7 @@ jobs:
       - name: Release notes
         if: steps.version.outputs.release == 'true'
         run: |
-          # Commits since the previous version tag (or all commits for the first release)
+          # List every commit since the last version tag (or all of them for the first release)
           $previous = git tag --list "v*" --sort=-v:refname | Select-Object -First 1
           $range = if ($previous) { "$previous..HEAD" } else { "HEAD" }
           $url = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/commit"

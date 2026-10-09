@@ -3,7 +3,7 @@ import { parse } from "@std/csv";
 import { SHEETS_DIR } from "./config.ts";
 import { type GameRound, parseGameRound } from "./models/game-round.ts";
 
-/** File names of all sheets, in directory order. Throws if the folder is missing. */
+/** Lists the .csv files in the sheets folder. Throws if the folder doesn't exist. */
 export function listSheets(): string[] {
   return [...Deno.readDirSync(SHEETS_DIR)]
     .filter((e) => e.isFile && e.name.endsWith(".csv"))

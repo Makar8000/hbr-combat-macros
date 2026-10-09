@@ -5,7 +5,7 @@ import type { Frame } from "../platform/screen.ts";
 // deno-lint-ignore no-explicit-any
 type Mat = any;
 
-// The package exports either the module, a promise of it, or a not-yet-initialized module.
+// Depending on the build, this import is the module, a promise, or a module that isn't ready yet.
 // deno-lint-ignore no-explicit-any
 const cv: any = await (async () => {
   // deno-lint-ignore no-explicit-any
@@ -19,11 +19,11 @@ const cv: any = await (async () => {
 export interface Template {
   /** 3-channel BGR. */
   color: Mat;
-  /** Alpha channel when the PNG has one, used as the match mask. */
+  /** The PNG's alpha channel, if it has one. Used as the match mask. */
   mask: Mat | null;
 }
 
-/** Loads a PNG as a BGR template, keeping alpha as a mask (like cv2.IMREAD_UNCHANGED). */
+/** Loads a PNG as a BGR template. If it has an alpha channel, that becomes the match mask. */
 export function loadTemplate(path: string): Template {
   const png = decode(Deno.readFileSync(path));
   if (png.depth !== 8 || (png.channels !== 3 && png.channels !== 4)) {
@@ -52,7 +52,7 @@ export function loadTemplate(path: string): Template {
   return { color, mask };
 }
 
-/** Best TM_CCOEFF_NORMED score of `template` inside `frame`. */
+/** How well `template` matches `frame`, from the best spot found (TM_CCOEFF_NORMED, 1 is perfect). */
 export function matchScore(frame: Frame, template: Template): number {
   const bgra = cv.matFromArray(
     frame.height,

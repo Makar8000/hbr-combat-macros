@@ -4,8 +4,7 @@ This application is a macro framework built to execute combat strategies in _Hea
 
 ## Credits
 
-This project is a rewrite of the original repository created by [zyx419](https://github.com/zyx419/HeavenBurnsRed_script), migrated to [Deno](https://deno.com). All credits for the
-foundational macro setup and initial repository baseline belong to the original creator.
+This project is a rewrite of the original repository created by [zyx419](https://github.com/zyx419/HeavenBurnsRed_script). All credits for the foundational macro setup and initial repository baseline belong to the original creator.
 
 ## How it Works
 
@@ -27,6 +26,7 @@ To write your own macros, check out the detailed [CSV Format Guide](./sheets/REA
 - Windows-only (for now).
 - You must run it as an **Administrator**. The keyboard inputs will not register otherwise.
 - The `sheets/` folder must exist next to the `.exe` and contain at least one `.csv` file.
+- Currently only supports games that run as fullscreen at 2560x1440 resolution. I plan to fix this to support any 16:9 ratio in the future.
 
 ### Using the Release
 

@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "1.0.0",
   "tasks": {
     "start": "deno run --allow-ffi --allow-read --allow-env --allow-sys src/main.ts",
     "compile": "deno compile --output hbr-combat-macros.exe --include src/assets --allow-ffi --allow-read --allow-env --allow-sys src/main.ts"

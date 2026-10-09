@@ -1,7 +1,7 @@
 import { delay } from "@std/async";
 import { keyboardInput, KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, MAPVK_VK_TO_VSC, sendInput, user32 } from "./win32.ts";
 
-// Same virtual keys pynput uses for these Key.* members.
+// Virtual key codes. The arrow keys need the extended-key flag.
 const SPECIAL_KEYS = {
   alt: { vk: 0x12, flags: 0 },
   enter: { vk: 0x0d, flags: 0 },
@@ -13,14 +13,13 @@ const SPECIAL_KEYS = {
 /** A special key name (see SPECIAL_KEYS) or a single character like "o" or "1". */
 export type Key = string;
 
-/** Builds the press/release INPUTs for a key; a single character like "o" or "1" is also a key. */
+/** Builds the key down and key up inputs for a key. */
 export function keyInputs(key: Key): [Uint8Array, Uint8Array] {
   let vk: number, flags: number;
   if (key in SPECIAL_KEYS) {
     ({ vk, flags } = SPECIAL_KEYS[key as keyof typeof SPECIAL_KEYS]);
   } else {
-    // pynput resolves characters with VkKeyScan and falls back to unicode if
-    // shift state is needed; we only need unshifted keys (digits, letters).
+    // Only single characters that don't need shift (digits and lowercase letters).
     const res = user32.VkKeyScanW(key.charCodeAt(0));
     if (key.length !== 1 || res === -1 || ((res >> 8) & 0xff) !== 0) {
       throw new Error(`Unsupported key: ${key}`);
@@ -35,7 +34,7 @@ export function keyInputs(key: Key): [Uint8Array, Uint8Array] {
   ];
 }
 
-/** Press then release, like pynput's Controller.tap. */
+/** Key down, then key up. */
 export function tap(key: Key): void {
   const [down, up] = keyInputs(key);
   sendInput(down);

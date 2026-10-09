@@ -17,11 +17,11 @@ export async function playRound(round: GameRound): Promise<void> {
     console.log("✨ Activating Alt Skill");
     await tapWithDelay(CONTROLS.altSkill);
     await tapWithDelay(CONTROLS.confirm);
-    await delay(5000); // animation
+    await delay(5000); // wait for the animation
   }
   if (odBefore) await overdrive(od);
 
-  // Position 0: no character action, just end the turn if asked.
+  // Position 0 means no character action, only end the turn if execute is set.
   if (round.position === 0) {
     if (round.execute) {
       await tapWithDelay(CONTROLS.confirm);
@@ -36,12 +36,12 @@ export async function playRound(round: GameRound): Promise<void> {
     if (round.sequence) await tapWithDelay(String(round.sequence.major));
   } else {
     if (round.sequence) {
-      // X.Y = Down X times, then Tab Y times. A plain X is just Down X times.
+      // X.Y is Down X times then Tab Y times. A plain X is only Down X times.
       for (let i = 0; i < round.sequence.major; i++) {
         await tapWithDelay(CONTROLS.menuDown, 0.3);
       }
       for (let i = 0; i < (round.sequence.minor ?? 0); i++) {
-        await tapWithDelay(CONTROLS.menuTab);
+        await tapWithDelay(CONTROLS.switchSkill);
       }
     }
     await tapWithDelay(CONTROLS.confirm, 0.65);

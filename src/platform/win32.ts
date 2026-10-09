@@ -1,4 +1,4 @@
-// The only file that calls Deno.dlopen. Windows x64 only.
+// Native Windows calls. This is the only file that uses Deno.dlopen. Windows x64 only.
 
 export const user32 = Deno.dlopen(
   "user32.dll",
@@ -23,7 +23,7 @@ const shell32 = Deno.dlopen("shell32.dll", {
   IsUserAnAdmin: { parameters: [], result: "i32" },
 }).symbols;
 
-/** Windows drops input from a non-elevated process aimed at an elevated window, silently. */
+/** Windows silently drops input sent from a normal process to an elevated one. */
 export const isElevated = (): boolean => shell32.IsUserAnAdmin() !== 0;
 
 export const gdi32 = Deno.dlopen(
@@ -58,8 +58,8 @@ export const gdi32 = Deno.dlopen(
   } as const,
 ).symbols;
 
-// INPUT on x64: type(4) + pad(4) + union(32). Union is MOUSEINPUT-sized, which
-// also covers KEYBDINPUT, so mouse support can reuse this later.
+// Size of INPUT on x64: 4 bytes type, 4 bytes padding, 32 bytes union.
+// The union is big enough for mouse input too.
 export const INPUT_SIZE = 40;
 const INPUT_KEYBOARD = 1;
 
@@ -67,7 +67,7 @@ export const KEYEVENTF_EXTENDEDKEY = 0x1;
 export const KEYEVENTF_KEYUP = 0x2;
 export const MAPVK_VK_TO_VSC = 0;
 
-/** Builds a keyboard INPUT struct, same fields pynput fills (wVk + wScan, no SCANCODE flag). */
+/** Builds a keyboard INPUT struct with both the virtual key and the scan code set. */
 export function keyboardInput(
   vk: number,
   scan: number,
@@ -90,5 +90,5 @@ export function sendInput(input: Uint8Array): void {
   }
 }
 
-// Coordinates must be physical pixels, as pyautogui assumed.
+// Without this, Windows scales coordinates on high DPI screens and the capture regions end up off.
 user32.SetProcessDPIAware();

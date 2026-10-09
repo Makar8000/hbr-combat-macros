@@ -4,7 +4,7 @@ import { delay } from "@std/async";
 import { activate, findWindow, isForeground } from "../platform/window.ts";
 import { playRound } from "./play-round.ts";
 
-/** Focuses the game and plays every round of a sheet in order. */
+/** Focuses the game, then plays each round of a sheet in order. */
 export async function runSheet(rounds: GameRound[]): Promise<void> {
   const win = findWindow(WINDOW_TITLE);
   if (!win) throw new Error(`Game window '${WINDOW_TITLE}' not found`);

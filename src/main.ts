@@ -46,5 +46,5 @@ for (let i = 1; i <= LOOP_COUNT; i++) {
   console.log(
     `⏱️ Macro Loop ${i} finished in: ${Math.floor(seconds / 60)}m ${seconds % 60}s`,
   );
-  // Later: finish-level routine (rewards, rematch, life stones) goes here.
+  // TODO: handle rewards, rematch and life stones recharge here.
 }

@@ -5,7 +5,7 @@ import { captureRegion } from "../platform/screen.ts";
 import { activate, findWindow } from "../platform/window.ts";
 import { loadTemplate, matchScore, type Template } from "../vision/match-template.ts";
 
-/** A recognizable screen state: a template expected inside a region (offsets from the game window). */
+/** An image to look for inside a region of the game window (x/y are offsets from the window's top-left). */
 export interface Condition {
   template: Template;
   x: number;
@@ -28,7 +28,7 @@ const condition = (
   height,
 });
 
-// Regions are for the original client resolution; retune here if the window size changes.
+// TODO: These regions are tuned for 2560x1440 window size. Fix them to support any 16:9 resolution.
 export const TURN_READY = condition("turn-ready.png", 2196, 1021, 310, 308);
 export const OVERDRIVE_MENU = condition(
   "overdrive-menu.png",
@@ -48,14 +48,14 @@ async function isMet(c: Condition): Promise<boolean> {
   try {
     activate(win);
   } catch {
-    // Focus failures are ignored, matching the original behavior.
+    // Focusing can fail, but we can still try the capture.
   }
   await delay(1000);
   const frame = captureRegion(win.left + c.x, win.top + c.y, c.width, c.height);
   return matchScore(frame, c.template) >= MATCH_THRESHOLD;
 }
 
-/** Polls (about every 2s) until the condition is met. Intentionally never times out. */
+/** Checks every couple of seconds until the condition is met. There is no timeout on purpose. */
 export async function waitFor(c: Condition): Promise<void> {
   while (!(await isMet(c))) {
     await delay(1000);

@@ -30,11 +30,11 @@ function visibleWindows(): { hwnd: bigint; title: string }[] {
   return found;
 }
 
-/** First visible window whose title contains `title`, case-insensitive (same as pygetwindow). */
+/** First visible window whose title contains `title`, ignoring case. */
 export function findWindow(title: string): GameWindow | undefined {
   const match = visibleWindows().find((w) => w.title.toUpperCase().includes(title.toUpperCase()));
   if (!match) return undefined;
-  // GetWindowRect, as pygetwindow does, so offsets line up with the old coordinates.
+  // The capture regions are measured from GetWindowRect, not the client area.
   const rect = new Int32Array(4);
   user32.GetWindowRect(match.hwnd, new Uint8Array(rect.buffer));
   const [left, top, right, bottom] = rect;
@@ -51,7 +51,7 @@ export function isForeground(win: GameWindow): boolean {
   return user32.GetForegroundWindow() === win.hwnd;
 }
 
-/** Throws if the OS refuses (pygetwindow raised too); callers decide whether to swallow. */
+/** Brings the window to the front. Throws if Windows refuses. */
 export function activate(win: GameWindow): void {
   if (user32.SetForegroundWindow(win.hwnd) === 0) {
     throw new Error("SetForegroundWindow failed");
