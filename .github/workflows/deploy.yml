@@ -59,7 +59,8 @@ jobs:
           # Commits since the previous version tag (or all commits for the first release)
           $previous = git tag --list "v*" --sort=-v:refname | Select-Object -First 1
           $range = if ($previous) { "$previous..HEAD" } else { "HEAD" }
-          git log $range --no-merges --pretty=format:"- %s" | Set-Content release-notes.md
+          $url = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/commit"
+          git log $range --no-merges --pretty=format:"- %s ([%h]($url/%H))" | Set-Content release-notes.md
 
       - name: Release
         if: steps.version.outputs.release == 'true'
