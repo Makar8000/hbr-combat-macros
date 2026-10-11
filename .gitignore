@@ -1,5 +1,7 @@
+node_modules/
+.clinerules
 *.exe
 *.tmp
-.clinerules
+
 cache/
 scanner/out/

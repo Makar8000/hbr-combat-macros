@@ -1,5 +1,5 @@
 // Lists the characters of the battle in progress with the skills the game holds for each, by id (Label) and display name (Name).
-// Needs an Administrator terminal and the game running, in a battle. Usage: deno task scan:skills
+// Needs an Administrator terminal and the game running, in a battle. Usage: bun run scan:skills
 //
 // Only one memory search is needed (the BattleModule class). Everything else is followed from it, so no stale objects turn up:
 //   BattleModule.Instance (static) -> characterDataManager -> frontPlayerList / subPlayerList -> BattlePlayerData
@@ -11,7 +11,7 @@ import { findPid, openProcess, read, readInt32, readList, readManagedString, rea
 
 const OVERDRIVE_STATES = ["None", "Charging", "CanPush", "WaitForInvoke", "PlayingEffect", "Playing"];
 
-const pid = Number(Deno.args[0] ?? findPid("HeavenBurnsRed.exe"));
+const pid = Number(process.argv[2] ?? findPid("HeavenBurnsRed.exe"));
 const handle = openProcess(pid);
 console.log(`Attached to PID ${pid}`);
 
@@ -47,7 +47,9 @@ const classes = findClasses(handle, "BattleModule", "Lily.Battle");
 console.log(`  found in ${((performance.now() - start) / 1000).toFixed(1)}s`);
 
 const module = liveBattleModule(handle, classes);
-if (!module) throw new Error("BattleModule.Instance is empty. Is the game in a battle?");
+if (!module) {
+  throw new Error("BattleModule.Instance is empty. Is the game in a battle?");
+}
 
 const manager = follow(module, "characterDataManager");
 if (!manager) throw new Error("BattleModule has no character manager yet.");
@@ -59,7 +61,10 @@ if (overdrive) {
   console.log(`Overdrive: ${OVERDRIVE_STATES[state ?? -1] ?? state}, ${readInt32(handle, at(overdrive, "currentPoint"))} points`);
 }
 
-for (const [line, field] of [["Front", "frontPlayerList"], ["Sub", "subPlayerList"]] as const) {
+for (const [line, field] of [
+  ["Front", "frontPlayerList"],
+  ["Sub", "subPlayerList"],
+] as const) {
   const list = follow(manager, field);
   const members = list ? readList(handle, list, 30) : null;
   if (!members) {
@@ -70,12 +75,15 @@ for (const [line, field] of [["Front", "frontPlayerList"], ["Sub", "subPlayerLis
   for (const c of members) {
     const skills = readList(handle, follow(c, "frontSkillList") ?? 0n, 30) ?? [];
     console.log(
-      `${hex(c)}  team ${readInt32(handle, at(c, "team"))}  position ${readInt32(handle, at(c, "position"))}  initial ${
-        readInt32(handle, at(c, "initialPosition"))
-      }  style ${describeCard(c)}`,
+      `${hex(c)}  team ${readInt32(handle, at(c, "team"))}  position ${readInt32(handle, at(c, "position"))}  initial ${readInt32(
+        handle,
+        at(c, "initialPosition"),
+      )}  style ${describeCard(c)}`,
     );
     const normal = follow(c, "_normalSkill");
     if (normal) console.log(`    normal attack: ${describeSkill(normal)}`);
-    skills.forEach((skill, i) => console.log(`    [${i}] ${describeSkill(skill)}`));
+    for (const [i, skill] of skills.entries()) {
+      console.log(`    [${i}] ${describeSkill(skill)}`);
+    }
   }
 }

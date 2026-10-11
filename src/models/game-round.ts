@@ -59,7 +59,7 @@ export function describeRound(r: GameRound): string {
   const pos = r.position === 0 ? "Pos:Skip" : `Pos:${r.position}`;
   const seq = r.sequence ? `Seq:${r.sequence.major}${r.sequence.minor === null ? "" : "." + r.sequence.minor}` : "Seq:None";
   const tgt = r.targetPosition ? `Target:${r.targetPosition}` : "";
-  return `[ ${r.label.padEnd(10)} ]: ${od.padEnd(8)} │ ${pos.padEnd(8)} │ ${(r.swap ? "SWAP" : "SKILL").padEnd(5)} │ ${seq.padEnd(8)} │ ${
-    tgt.padEnd(8)
-  } │ ${(r.execute ? "EXECUTE" : "").padEnd(7)}`;
+  return `[ ${r.label.padEnd(10)} ]: ${od.padEnd(8)} │ ${pos.padEnd(8)} │ ${(r.swap ? "SWAP" : "SKILL").padEnd(5)} │ ${seq.padEnd(8)} │ ${tgt.padEnd(
+    8,
+  )} │ ${(r.execute ? "EXECUTE" : "").padEnd(7)}`;
 }

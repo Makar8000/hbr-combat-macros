@@ -1,0 +1,32 @@
+{
+  "name": "hbr-combat-macros",
+  "version": "1.0.1",
+  "type": "module",
+  "scripts": {
+    "start": "bun src/main.ts",
+    "scan:metadata": "bun scanner/metadata.ts",
+    "scan:fsm": "bun scanner/fsm.ts",
+    "scan:values": "bun scanner/values.ts",
+    "scan:skills": "bun scanner/skills.ts",
+    "scan:fields": "bun scanner/fields.ts",
+    "scan:modules": "bun scanner/modules.ts",
+    "scan:behaviours": "bun scanner/behaviours.ts",
+    "scan:menu": "bun scanner/menu.ts",
+    "check": "tsc --noEmit",
+    "lint": "biome check",
+    "lint:fix": "bun run lint --write",
+    "compile": "bun build --compile --outfile hbr-combat-macros.exe src/main.ts"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^8.7.3",
+    "@techstark/opencv-js": "5.0.0-release.1",
+    "fast-png": "^8.0.0",
+    "papaparse": "^5.7.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "@types/bun": "latest",
+    "@types/papaparse": "^5.5.2",
+    "typescript": "^7.0.2"
+  }
+}

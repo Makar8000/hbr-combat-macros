@@ -1,14 +1,15 @@
 // Shows how the battle's Arbor state machine is reached from BattleModule (the path scan:fsm uses), and what else hangs off BattleModule.
-// Needs an Administrator terminal and the game running, in a battle. Usage: deno task scan:modules
+// Needs an Administrator terminal and the game running, in a battle. Usage: bun run scan:modules
 //
 // Prints every reference field of BattleModule and of each object in its moduleList, as "field -> ClassName", then of its BattleState
 // and that state's battleStateMachine. A line marked <== is an Arbor state machine. The last lines check that
 // battleStateMachine.instance is the battle machine. Writes the same text to scanner/out/modules.txt.
 
+import { mkdirSync, writeFileSync } from "node:fs";
 import { classFields, classNameOf, fieldOf, findClasses, liveBattleModule } from "./il2cpp.ts";
 import { findPid, openProcess, readList, readManagedString, readPointer } from "./memory.ts";
 
-const pid = Number(Deno.args[0] ?? findPid("HeavenBurnsRed.exe"));
+const pid = Number(process.argv[2] ?? findPid("HeavenBurnsRed.exe"));
 const handle = openProcess(pid);
 console.log(`Attached to PID ${pid}`);
 
@@ -69,6 +70,6 @@ if (sub) {
   out(`  ${names.length} states, has コマンド選択: ${names.includes("コマンド選択")}`);
 }
 
-Deno.mkdirSync("scanner/out", { recursive: true });
-Deno.writeTextFileSync("scanner/out/modules.txt", lines.join("\n") + "\n");
+mkdirSync("scanner/out", { recursive: true });
+writeFileSync("scanner/out/modules.txt", lines.join("\n") + "\n");
 console.log("\nWrote scanner/out/modules.txt");

@@ -1,5 +1,5 @@
 // Shows what is highlighted in the open skill menu (a skill, or the Change button of a form-change style), and prints it each time it changes.
-// Needs an Administrator terminal and the game running, in a battle. Usage: deno task scan:menu. Open a skill menu, then use Down, Up and Tab.
+// Needs an Administrator terminal and the game running, in a battle. Usage: bun run scan:menu. Open a skill menu, then use Down, Up and Tab.
 //
 // Everything is followed from BattleModule.Instance, so a retry or a new battle needs no restart and no search for the menu:
 //   BattleModule.hudModule -> BattleHudModule.battleMemberHudModule -> BattleMemberHudModule
@@ -13,7 +13,7 @@ import { findPid, openProcess, read, readArray, readInt32, readManagedString, re
 
 const CHANGE_BUTTON = 100; // BattleMemberHudModule.focusedSkillIndex while the Change (form change) button is highlighted
 
-const pid = Number(Deno.args[0] ?? findPid("HeavenBurnsRed.exe"));
+const pid = Number(process.argv[2] ?? findPid("HeavenBurnsRed.exe"));
 const handle = openProcess(pid);
 console.log(`Attached to PID ${pid}`);
 

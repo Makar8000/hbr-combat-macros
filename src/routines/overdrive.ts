@@ -1,4 +1,3 @@
-import { delay } from "@std/async";
 import { OVERDRIVE_MENU, waitFor } from "../game/conditions.ts";
 import { CONTROLS } from "../game/controls.ts";
 import { tapWithDelay } from "../platform/keyboard.ts";
@@ -10,5 +9,5 @@ export async function overdrive(level: number): Promise<void> {
   await tapWithDelay(CONTROLS.overdriveMenu);
   await waitFor(OVERDRIVE_MENU);
   await tapWithDelay(String(key));
-  await delay(3000); // wait for the animation
+  await Bun.sleep(3000); // wait for the animation
 }

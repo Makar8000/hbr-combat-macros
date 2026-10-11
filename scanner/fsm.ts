@@ -1,12 +1,13 @@
 // Finds the game's live Arbor state machines and prints the name of each one's current state whenever it changes.
 // The battle machine is followed from BattleModule, so a retry, win, loss or squad change needs no new memory search.
-// Needs an Administrator terminal and the game running. Usage: deno task scan:fsm
+// Needs an Administrator terminal and the game running. Usage: bun run scan:fsm
 //
 // The battle machine: BattleModule.Instance -> parent (BattleState) -> battleStateMachine (SubStateModule) -> instance (ArborFSM).
 // The game builds a new machine for every battle, retry and squad change, and `instance` always holds the current one.
 // The other machines (app, menus) have no such route, so they are found once at startup by searching memory for every object whose first
 // word is an ArborFSM class pointer (see "How things are found" in scanner/README.md).
 
+import { mkdirSync, writeFileSync } from "node:fs";
 import { fieldOf, fieldOffset, findClasses, findClassesMany, liveBattleModule } from "./il2cpp.ts";
 import { findPid, findPointers, openProcess, readList, readManagedString, readPointer } from "./memory.ts";
 
@@ -17,7 +18,7 @@ const COMMAND_SELECT = "コマンド選択";
 // If the game has not created the BattleModule class yet (it may only exist after the first battle), look again this often.
 const CLASS_RETRY_MS = 5000;
 
-const pid = Number(Deno.args[0] ?? findPid("HeavenBurnsRed.exe"));
+const pid = Number(process.argv[2] ?? findPid("HeavenBurnsRed.exe"));
 const handle = openProcess(pid);
 console.log(`Attached to PID ${pid}`);
 
@@ -34,9 +35,11 @@ function time<T>(label: string, work: () => T): T {
 // The classes never move while the game runs, so they are only looked up once.
 console.log("Searching memory for the classes...");
 // Live machines are ArborFSM, a sealed subclass of ArborFSMInternal. Both keep _CurrentState at the same offset.
-const found = time(
-  "Found the classes",
-  () => findClassesMany(handle, ["ArborFSM", "ArborFSMInternal", "State"].map((name) => [name, FSM_NAMESPACE])),
+const found = time("Found the classes", () =>
+  findClassesMany(
+    handle,
+    ["ArborFSM", "ArborFSMInternal", "State"].map((name) => [name, FSM_NAMESPACE]),
+  ),
 );
 for (const [name, classes] of found) {
   if (classes.length === 0) throw new Error(`Could not find the ${name} class. The class layout may have changed.`);
@@ -52,7 +55,9 @@ function offsetIn(classes: bigint[], name: string): bigint {
   for (const klass of classes) {
     try {
       return fieldOffset(handle, klass, name);
-    } catch { /* not this one */ }
+    } catch {
+      /* not this one */
+    }
   }
   throw new Error(`No field '${name}' on any of the classes. The class layout may have changed.`);
 }
@@ -74,10 +79,14 @@ function currentStateName(fsm: bigint): string | null {
 
 function listStates(fsm: bigint): string[] {
   const list = readPointer(handle, fsm + FSM_STATES);
-  return (list && readList(handle, list)?.map((state) => {
-    const namePointer = states.has(state) ? readPointer(handle, state + STATE_NAME) : null;
-    return (namePointer && readManagedString(handle, namePointer)) || "(unnamed)";
-  })) || [];
+  return (
+    (list &&
+      readList(handle, list)?.map((state) => {
+        const namePointer = states.has(state) ? readPointer(handle, state + STATE_NAME) : null;
+        return (namePointer && readManagedString(handle, namePointer)) || "(unnamed)";
+      })) ||
+    []
+  );
 }
 
 /** Finds every live object of the classes (about 2 to 3 seconds). */
@@ -91,9 +100,14 @@ function scan() {
 
 /** Every state each machine has, so the important ones can be found without triggering them in the game. */
 function writeStateList() {
-  const text = machines.map((fsm) => `${hex(fsm)}  (now: ${currentStateName(fsm)})\n${listStates(fsm).map((n) => `    ${n}`).join("\n")}`);
-  Deno.mkdirSync("scanner/out", { recursive: true });
-  Deno.writeTextFileSync("scanner/out/fsm-states.txt", text.join("\n\n") + "\n");
+  const text = machines.map(
+    (fsm) =>
+      `${hex(fsm)}  (now: ${currentStateName(fsm)})\n${listStates(fsm)
+        .map((n) => `    ${n}`)
+        .join("\n")}`,
+  );
+  mkdirSync("scanner/out", { recursive: true });
+  writeFileSync("scanner/out/fsm-states.txt", text.join("\n\n") + "\n");
 }
 
 console.log("Searching memory for live objects of both classes...");

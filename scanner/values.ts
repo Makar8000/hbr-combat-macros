@@ -1,5 +1,5 @@
 // Prints the live values of a few game objects and shows each change as it happens.
-// Needs an Administrator terminal and the game running, in a battle. Usage: deno task scan:values
+// Needs an Administrator terminal and the game running, in a battle. Usage: bun run scan:values
 //
 // Watches:
 //   - UserBattleSetting.autoMode: Off / Saving / Full. Toggle auto mode in the game to see it change.
@@ -41,7 +41,7 @@ const overdriveSpec: Spec = {
   ],
 };
 
-const pid = Number(Deno.args[0] ?? findPid("HeavenBurnsRed.exe"));
+const pid = Number(process.argv[2] ?? findPid("HeavenBurnsRed.exe"));
 const handle = openProcess(pid);
 console.log(`Attached to PID ${pid}`);
 
@@ -63,7 +63,10 @@ const fieldTexts = (spec: Spec, address: bigint, v: DataView) =>
   fieldValues(spec, address, v).map((n, i) => `${spec.fields[i].name}=${spec.fields[i].labels?.[n] ?? n}`);
 
 console.log("Searching memory for the classes...");
-const byName = findClassesMany(handle, [["UserData", null], ["BattleModule", BATTLE_NAMESPACE]]);
+const byName = findClassesMany(handle, [
+  ["UserData", null],
+  ["BattleModule", BATTLE_NAMESPACE],
+]);
 const userDataClasses = byName.get("UserData")!;
 const moduleClasses = byName.get("BattleModule")!;
 console.log(`  UserData: ${userDataClasses.map(hex).join(", ") || "not found"}`);
@@ -117,7 +120,7 @@ while (true) {
       console.log(`${clock()}  ${entry[0].name} is now ${hex(now)}`);
     } else console.log(`${clock()}  no ${entry[0].name}`);
   }
-  for (const address of watched.flatMap(([, , current]) => current ? [current] : [])) {
+  for (const address of watched.flatMap(([, , current]) => (current ? [current] : []))) {
     const spec = specOf.get(address)!;
     const v = snapshot(address);
     if (!v) continue;
@@ -126,7 +129,7 @@ while (true) {
     last.set(address, after);
     if (!before) console.log(`${clock()}  ${spec.name} ${hex(address)}  ${after.join(" ")}`);
     else {
-      const changed = after.flatMap((text, i) => text !== before[i] ? [`${before[i]} -> ${text}`] : []);
+      const changed = after.flatMap((text, i) => (text !== before[i] ? [`${before[i]} -> ${text}`] : []));
       if (changed.length) console.log(`${clock()}  ${spec.name} ${hex(address)}  ${changed.join("   ")}`);
     }
   }

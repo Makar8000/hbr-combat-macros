@@ -1,14 +1,15 @@
 // Checks whether a state could be told apart by the class of its behaviours instead of by its name.
-// Needs an Administrator terminal and the game running, in a battle. Usage: deno task scan:behaviours
+// Needs an Administrator terminal and the game running, in a battle. Usage: bun run scan:behaviours
 //
 // For every state of the battle machine (BattleModule.Instance -> parent -> battleStateMachine -> instance) it prints the name and the
 // classes in State._Behaviours, then a summary: states with no behaviours, and classes shared by several states (which could not
 // identify one of them). Writes the same text to scanner/out/behaviours.txt.
 
+import { mkdirSync, writeFileSync } from "node:fs";
 import { classNameOf, fieldOf, findClasses, liveBattleModule } from "./il2cpp.ts";
 import { findPid, openProcess, readList, readManagedString, readPointer } from "./memory.ts";
 
-const pid = Number(Deno.args[0] ?? findPid("HeavenBurnsRed.exe"));
+const pid = Number(process.argv[2] ?? findPid("HeavenBurnsRed.exe"));
 const handle = openProcess(pid);
 console.log(`Attached to PID ${pid}`);
 
@@ -63,6 +64,6 @@ for (const wanted of ["コマンド選択", "オーバードライブ発動レ�
   out(`  ${wanted.padEnd(18)} ${r ? `${first ?? "(no behaviours)"}  ${unique ? "unique" : "NOT unique"}` : "not in this machine"}`);
 }
 
-Deno.mkdirSync("scanner/out", { recursive: true });
-Deno.writeTextFileSync("scanner/out/behaviours.txt", lines.join("\n") + "\n");
+mkdirSync("scanner/out", { recursive: true });
+writeFileSync("scanner/out/behaviours.txt", lines.join("\n") + "\n");
 console.log("\nWrote scanner/out/behaviours.txt");

@@ -11,12 +11,7 @@ const SRCCOPY = 0x00cc0020;
 const DIB_RGB_COLORS = 0;
 
 /** Grabs a region of the screen using GDI. */
-export function captureRegion(
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-): Frame {
+export function captureRegion(x: number, y: number, width: number, height: number): Frame {
   const screenDc = user32.GetDC(0n);
   const memDc = gdi32.CreateCompatibleDC(screenDc);
   const bitmap = gdi32.CreateCompatibleBitmap(screenDc, width, height);
@@ -34,17 +29,7 @@ export function captureRegion(
     view.setUint16(12, 1, true); // planes
     view.setUint16(14, 32, true); // bpp
     const data = new Uint8Array(width * height * 4);
-    if (
-      gdi32.GetDIBits(
-        memDc,
-        bitmap,
-        0,
-        height,
-        data,
-        header,
-        DIB_RGB_COLORS,
-      ) !== height
-    ) {
+    if (gdi32.GetDIBits(memDc, bitmap, 0, height, data, header, DIB_RGB_COLORS) !== height) {
       throw new Error("GetDIBits failed");
     }
     return { width, height, data };

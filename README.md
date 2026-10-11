@@ -37,13 +37,14 @@ To write your own macros, check out the detailed [CSV Format Guide](./sheets/REA
 
 ### Running From Source
 
-Install [Deno](https://deno.com), then run the following from the repository root in an Administrator terminal:
+Install [Bun](https://bun.sh), then run the following from the repository root in an Administrator terminal:
 
 ```bash
-deno task start
+bun install
+bun run start
 ```
 
-Dependencies are fetched automatically on first run. To build the exe yourself, use `deno task compile`.
+To build the exe yourself, use `bun run compile`.
 
 ## Disclaimer
 

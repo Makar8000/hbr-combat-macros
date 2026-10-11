@@ -1,13 +1,15 @@
 // Dumps every class, field and method name from the game's IL2CPP global-metadata.dat (version 31).
-// Reads the file only. Usage: deno task scan:metadata [path-to-global-metadata.dat] [output-file]
+// Reads the file only. Usage: bun run scan:metadata [path-to-global-metadata.dat] [output-file]
 //
 // The metadata has names, but NOT instance field offsets or field types. Those live in GameAssembly.dll.
 
-const DEFAULT_METADATA = "E:/Program Files/YostarGames/HeavenBurnsRed/HeavenBurnsRed_Data/il2cpp_data/Metadata/global-metadata.dat";
-const metadataPath = Deno.args[0] ?? DEFAULT_METADATA;
-const outputPath = Deno.args[1] ?? "scanner/out/metadata-dump.txt";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
-const bytes = Deno.readFileSync(metadataPath);
+const DEFAULT_METADATA = "E:/Program Files/YostarGames/HeavenBurnsRed/HeavenBurnsRed_Data/il2cpp_data/Metadata/global-metadata.dat";
+const metadataPath = process.argv[2] ?? DEFAULT_METADATA;
+const outputPath = process.argv[3] ?? "scanner/out/metadata-dump.txt";
+
+const bytes = readFileSync(metadataPath);
 const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 const i32 = (at: number) => dv.getInt32(at, true);
 const u16 = (at: number) => dv.getUint16(at, true);
@@ -60,7 +62,12 @@ const TYPE_SIZE = 88;
 const FIELD_SIZE = 12;
 const METHOD_SIZE = 36;
 const IMAGE_SIZE = 40;
-for (const [name, size] of [["typeDefinitions", TYPE_SIZE], ["fields", FIELD_SIZE], ["methods", METHOD_SIZE], ["images", IMAGE_SIZE]] as const) {
+for (const [name, size] of [
+  ["typeDefinitions", TYPE_SIZE],
+  ["fields", FIELD_SIZE],
+  ["methods", METHOD_SIZE],
+  ["images", IMAGE_SIZE],
+] as const) {
   if (section(name).size % size !== 0) throw new Error(`${name} size ${section(name).size} is not a multiple of ${size}`);
 }
 
@@ -103,6 +110,6 @@ for (let img = 0; img < images.size / IMAGE_SIZE; img++) {
   }
 }
 
-Deno.mkdirSync(outputPath.replace(/[\\/][^\\/]*$/, ""), { recursive: true });
-Deno.writeTextFileSync(outputPath, lines.join("\n") + "\n");
+mkdirSync(outputPath.replace(/[\\/][^\\/]*$/, ""), { recursive: true });
+writeFileSync(outputPath, lines.join("\n") + "\n");
 console.log(`Wrote ${typeCount} types, ${fieldCount} fields, ${methodCount} methods to ${outputPath}`);

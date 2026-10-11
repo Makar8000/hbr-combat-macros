@@ -1,4 +1,3 @@
-import { delay } from "@std/async";
 import { TURN_READY, waitFor } from "../game/conditions.ts";
 import { CONTROLS } from "../game/controls.ts";
 import { describeRound, type GameRound } from "../models/game-round.ts";
@@ -17,7 +16,7 @@ export async function playRound(round: GameRound): Promise<void> {
     console.log("✨ Activating Alt Skill");
     await tapWithDelay(CONTROLS.altSkill);
     await tapWithDelay(CONTROLS.confirm);
-    await delay(5000); // wait for the animation
+    await Bun.sleep(5000); // wait for the animation
   }
   if (odBefore) await overdrive(od);
 
@@ -55,7 +54,7 @@ export async function playRound(round: GameRound): Promise<void> {
   if (round.execute) {
     await tapWithDelay(CONTROLS.confirm);
     if (odAfter) {
-      await delay(2500);
+      await Bun.sleep(2500);
       await overdrive(od);
     }
   }

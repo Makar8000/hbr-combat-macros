@@ -1,3 +1,4 @@
+import { FFIType, JSCallback } from "bun:ffi";
 import { user32 } from "./win32.ts";
 
 export interface GameWindow {
@@ -10,9 +11,8 @@ export interface GameWindow {
 
 function visibleWindows(): { hwnd: bigint; title: string }[] {
   const found: { hwnd: bigint; title: string }[] = [];
-  const cb = new Deno.UnsafeCallback(
-    { parameters: ["isize", "isize"], result: "i32" } as const,
-    (hwnd) => {
+  const cb = new JSCallback(
+    (hwnd: bigint) => {
       if (user32.IsWindowVisible(hwnd) !== 0) {
         const len = user32.GetWindowTextLengthW(hwnd);
         const buf = new Uint16Array(len + 1);
@@ -24,8 +24,9 @@ function visibleWindows(): { hwnd: bigint; title: string }[] {
       }
       return 1;
     },
+    { args: [FFIType.i64, FFIType.i64], returns: FFIType.i32 },
   );
-  user32.EnumWindows(cb.pointer, 0n);
+  user32.EnumWindows(cb.ptr, 0n);
   cb.close();
   return found;
 }

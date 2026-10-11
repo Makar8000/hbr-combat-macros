@@ -1,5 +1,4 @@
-import { delay } from "@std/async";
-import { keyboardInput, KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, MAPVK_VK_TO_VSC, sendInput, user32 } from "./win32.ts";
+import { KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, keyboardInput, MAPVK_VK_TO_VSC, sendInput, user32 } from "./win32.ts";
 
 // Virtual key codes. The arrow keys need the extended-key flag.
 const SPECIAL_KEYS = {
@@ -28,10 +27,7 @@ export function keyInputs(key: Key): [Uint8Array, Uint8Array] {
     flags = 0;
   }
   const scan = user32.MapVirtualKeyW(vk, MAPVK_VK_TO_VSC);
-  return [
-    keyboardInput(vk, scan, flags),
-    keyboardInput(vk, scan, flags | KEYEVENTF_KEYUP),
-  ];
+  return [keyboardInput(vk, scan, flags), keyboardInput(vk, scan, flags | KEYEVENTF_KEYUP)];
 }
 
 /** Key down, then key up. */
@@ -43,5 +39,5 @@ export function tap(key: Key): void {
 
 export async function tapWithDelay(key: Key, seconds = 0.4): Promise<void> {
   tap(key);
-  await delay(seconds * 1000);
+  await Bun.sleep(seconds * 1000);
 }

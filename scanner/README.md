@@ -19,14 +19,14 @@ All are read-only. Run them in an **elevated terminal with the game running**. M
 
 | Command                     | What it does                                                                                                                                                                                                                   |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `deno task scan:fields`     | Prints the fields and offsets of the classes you name (`deno task scan:fields BattleModule MasterCard`), read from the running game.                                                                                           |
-| `deno task scan:metadata`   | Parses `global-metadata.dat` into `scanner/out/metadata-dump.txt` (class, field and method names, no offsets). Needs no game.                                                                                                  |
-| `deno task scan:fsm`        | Finds the app and menu machines once, writes every state name to `scanner/out/fsm-states.txt`, then prints state changes live. The battle machine is followed from `BattleModule`, so any battle is picked up with no rescans. |
-| `deno task scan:values`     | In a battle. Prints `UserBattleSetting` (auto mode, from `UserData.instance`) and the live overdrive manager (state, points, stock), and every change. A new battle is picked up with no restart.                              |
-| `deno task scan:skills`     | In a battle. Prints the front and sub lines with `team`, `position`, `initialPosition`, the style, and each character's skills (`Label` / `Id` / `Name`), plus the overdrive state. Prints once and exits.                     |
-| `deno task scan:menu`       | In a battle. Prints `focusedSkillIndex` (`100` is the Change button), the `_isFocused` row, the row names, and whether the open character has a form change and which form is active. Works after a retry with no restart.     |
-| `deno task scan:modules`    | In a battle. Experiment: prints the objects `BattleModule` and its modules point at, and the path to the battle's state machine. Writes `scanner/out/modules.txt`.                                                             |
-| `deno task scan:behaviours` | In a battle. Experiment: prints every state of the battle machine with the classes of its behaviours, and which are unique. Writes `scanner/out/behaviours.txt`.                                                               |
+| `bun run scan:fields`     | Prints the fields and offsets of the classes you name (`bun run scan:fields BattleModule MasterCard`), read from the running game.                                                                                           |
+| `bun run scan:metadata`   | Parses `global-metadata.dat` into `scanner/out/metadata-dump.txt` (class, field and method names, no offsets). Needs no game.                                                                                                  |
+| `bun run scan:fsm`        | Finds the app and menu machines once, writes every state name to `scanner/out/fsm-states.txt`, then prints state changes live. The battle machine is followed from `BattleModule`, so any battle is picked up with no rescans. |
+| `bun run scan:values`     | In a battle. Prints `UserBattleSetting` (auto mode, from `UserData.instance`) and the live overdrive manager (state, points, stock), and every change. A new battle is picked up with no restart.                              |
+| `bun run scan:skills`     | In a battle. Prints the front and sub lines with `team`, `position`, `initialPosition`, the style, and each character's skills (`Label` / `Id` / `Name`), plus the overdrive state. Prints once and exits.                     |
+| `bun run scan:menu`       | In a battle. Prints `focusedSkillIndex` (`100` is the Change button), the `_isFocused` row, the row names, and whether the open character has a form change and which form is active. Works after a retry with no restart.     |
+| `bun run scan:modules`    | In a battle. Experiment: prints the objects `BattleModule` and its modules point at, and the path to the battle's state machine. Writes `scanner/out/modules.txt`.                                                             |
+| `bun run scan:behaviours` | In a battle. Experiment: prints every state of the battle machine with the classes of its behaviours, and which are unique. Writes `scanner/out/behaviours.txt`.                                                               |
 
 `scanner/memory.ts` (open process, read, walk regions, find strings and pointers) and `scanner/il2cpp.ts` (find classes, read fields and
 statics by name) are the shared helpers. `scanner/out/` is git-ignored.
@@ -62,7 +62,7 @@ fields, in entries of 0x20 bytes: name pointer `+0x0`, type `+0x8`, owning class
 - **Generic classes** have real offsets in memory, where `dump.cs` prints `0x0` (`XIUIDataListBase.list` is `0x38`).
 - Each class's table is read once and cached. A class that can't be read gives a "No field" error, not a wrong offset.
 
-`deno task scan:fields <ClassName> ...` prints a class's fields and offsets from the running game. It replaces searching `dump.cs`.
+`bun run scan:fields <ClassName> ...` prints a class's fields and offsets from the running game. It replaces searching `dump.cs`.
 
 **Still hardcoded:** the `Il2CppClass` layout (`name` `0x10`, `namespaze` `0x18`, `parent` `0x58`, `fields` `0x80`, `static_fields` `0xB8`) in
 `il2cpp.ts`, and the list, array and string layouts in `memory.ts`. These only change if the game upgrades Unity.

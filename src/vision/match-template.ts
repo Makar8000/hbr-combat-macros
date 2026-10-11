@@ -1,14 +1,12 @@
+import { readFileSync } from "node:fs";
 import cvModule from "@techstark/opencv-js";
 import { decode } from "fast-png";
 import type { Frame } from "../platform/screen.ts";
 
-// deno-lint-ignore no-explicit-any
 type Mat = any;
 
 // Depending on the build, this import is the module, a promise, or a module that isn't ready yet.
-// deno-lint-ignore no-explicit-any
 const cv: any = await (async () => {
-  // deno-lint-ignore no-explicit-any
   const mod: any = cvModule instanceof Promise ? await cvModule : cvModule;
   if (!mod.Mat) {
     await new Promise<void>((resolve) => (mod.onRuntimeInitialized = resolve));
@@ -25,18 +23,11 @@ export interface Template {
 
 /** Loads a PNG as a BGR template. If it has an alpha channel, that becomes the match mask. */
 export function loadTemplate(path: string): Template {
-  const png = decode(Deno.readFileSync(path));
+  const png = decode(readFileSync(path));
   if (png.depth !== 8 || (png.channels !== 3 && png.channels !== 4)) {
-    throw new Error(
-      `Unsupported template format (${png.channels}ch, ${png.depth}-bit): ${path}`,
-    );
+    throw new Error(`Unsupported template format (${png.channels}ch, ${png.depth}-bit): ${path}`);
   }
-  const src = cv.matFromArray(
-    png.height,
-    png.width,
-    png.channels === 4 ? cv.CV_8UC4 : cv.CV_8UC3,
-    png.data,
-  );
+  const src = cv.matFromArray(png.height, png.width, png.channels === 4 ? cv.CV_8UC4 : cv.CV_8UC3, png.data);
   const color = new cv.Mat();
   let mask: Mat | null = null;
   if (png.channels === 4) {
@@ -57,12 +48,7 @@ export function loadTemplate(path: string): Template {
  * `scale` is the frame's size relative to the template's resolution. The frame is resized back to it.
  */
 export function matchScore(frame: Frame, template: Template, scale = 1): number {
-  const bgra = cv.matFromArray(
-    frame.height,
-    frame.width,
-    cv.CV_8UC4,
-    frame.data,
-  );
+  const bgra = cv.matFromArray(frame.height, frame.width, cv.CV_8UC4, frame.data);
   const bgr = new cv.Mat();
   const result = new cv.Mat();
   try {
@@ -74,13 +60,7 @@ export function matchScore(frame: Frame, template: Template, scale = 1): number 
       cv.resize(bgr, bgr, new cv.Size(w, h), 0, 0, scale > 1 ? cv.INTER_AREA : cv.INTER_LINEAR);
     }
     if (template.mask) {
-      cv.matchTemplate(
-        bgr,
-        template.color,
-        result,
-        cv.TM_CCOEFF_NORMED,
-        template.mask,
-      );
+      cv.matchTemplate(bgr, template.color, result, cv.TM_CCOEFF_NORMED, template.mask);
     } else {
       cv.matchTemplate(bgr, template.color, result, cv.TM_CCOEFF_NORMED);
     }

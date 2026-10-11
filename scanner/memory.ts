@@ -1,10 +1,14 @@
 // Read-only access to another process's memory (Windows x64). Run elevated or OpenProcess fails with error 5.
 
-const k32 = Deno.dlopen("kernel32.dll", {
-  OpenProcess: { parameters: ["u32", "i32", "u32"], result: "isize" },
-  ReadProcessMemory: { parameters: ["isize", "u64", "buffer", "usize", "buffer"], result: "i32" },
-  VirtualQueryEx: { parameters: ["isize", "u64", "buffer", "usize"], result: "usize" },
-  GetLastError: { parameters: [], result: "u32" },
+import { dlopen, FFIType } from "bun:ffi";
+
+const { i32, i64, ptr, u32, u64 } = FFIType;
+
+const k32 = dlopen("kernel32.dll", {
+  OpenProcess: { args: [u32, i32, u32], returns: i64 },
+  ReadProcessMemory: { args: [i64, u64, ptr, u64, ptr], returns: i32 },
+  VirtualQueryEx: { args: [i64, u64, ptr, u64], returns: u64 },
+  GetLastError: { args: [], returns: u32 },
 }).symbols;
 
 const PROCESS_VM_READ_AND_QUERY = 0x0010 | 0x0400;
@@ -19,8 +23,8 @@ export type Handle = bigint;
 
 /** The PID of the first running process with this exact image name. */
 export function findPid(imageName: string): number {
-  const out = new Deno.Command("tasklist", { args: ["/FI", `IMAGENAME eq ${imageName}`, "/FO", "CSV", "/NH"] }).outputSync();
-  const match = new TextDecoder().decode(out.stdout).match(/^"[^"]+","(\d+)"/m);
+  const out = Bun.spawnSync(["tasklist", "/FI", `IMAGENAME eq ${imageName}`, "/FO", "CSV", "/NH"]);
+  const match = out.stdout.toString().match(/^"[^"]+","(\d+)"/m);
   if (!match) throw new Error(`${imageName} is not running`);
   return Number(match[1]);
 }
@@ -28,7 +32,7 @@ export function findPid(imageName: string): number {
 export function openProcess(pid: number): Handle {
   const handle = k32.OpenProcess(PROCESS_VM_READ_AND_QUERY, 0, pid);
   if (!handle) throw new Error(`OpenProcess failed (error ${k32.GetLastError()}). Error 5 means you need an Administrator terminal.`);
-  return BigInt(handle);
+  return handle;
 }
 
 /** Reads `size` bytes, or returns null if any part is unreadable. */
@@ -107,7 +111,9 @@ export function* readableChunks(handle: Handle, everything = false): Generator<{
     const size = view.getBigUint64(24, true);
     const protect = view.getUint32(36, true);
     if (
-      view.getUint32(32, true) === MEM_COMMIT && protect !== 0 && !(protect & (PAGE_NOACCESS | PAGE_GUARD)) &&
+      view.getUint32(32, true) === MEM_COMMIT &&
+      protect !== 0 &&
+      !(protect & (PAGE_NOACCESS | PAGE_GUARD)) &&
       (everything || view.getUint32(40, true) !== MEM_IMAGE)
     ) {
       for (let offset = 0n; offset < size; offset += BigInt(CHUNK)) {

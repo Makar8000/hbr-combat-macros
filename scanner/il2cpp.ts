@@ -21,7 +21,11 @@ export function findClasses(handle: Handle, name: string, namespace: string | nu
  */
 export function findClassesMany(handle: Handle, wanted: [name: string, namespace: string | null][]): Map<string, bigint[]> {
   for (const everything of [false, true]) {
-    const strings = findStrings(handle, wanted.map(([name]) => name), everything);
+    const strings = findStrings(
+      handle,
+      wanted.map(([name]) => name),
+      everything,
+    );
     const pointers = findPointers(handle, [...strings.values()].flat(), everything);
     const result = new Map<string, bigint[]>();
     for (const [name, namespace] of wanted) {
@@ -113,7 +117,10 @@ export function fieldOffset(handle: Handle, klass: bigint, name: string): bigint
 function findField(handle: Handle, klass: bigint, name: string): Field | undefined {
   const names = [name, `<${name}>k__BackingField`, `_${name}`];
   let fields = fieldCache.get(klass);
-  if (!fields) fieldCache.set(klass, fields = classFields(handle, klass));
+  if (!fields) {
+    fields = classFields(handle, klass);
+    fieldCache.set(klass, fields);
+  }
   return fields.find((f) => names.includes(f.name));
 }
 
